@@ -1,0 +1,63 @@
+/* 页面布局：顶部操作栏与终端区域。 */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  min-height: 52px;
+  padding: 9px 16px;
+  background: color-mix(in srgb, var(--bg-panel) 82%, transparent);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.terminal-view {
+  flex: 1;
+  min-height: 0;
+  padding: 14px 18px 18px;
+}
+
+.terminal-scroll {
+  height: 100%;
+  overflow: auto;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-large);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--accent) 2.5%, transparent),
+      transparent 140px
+    ),
+    var(--terminal-bg);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #ffffff 4%, transparent),
+    var(--shadow);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.terminal-scroll:focus-within {
+  border-color: color-mix(in srgb, var(--accent) 38%, var(--border));
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #ffffff 4%, transparent),
+    0 0 0 2px color-mix(in srgb, var(--accent) 10%, transparent),
+    0 0 32px color-mix(in srgb, var(--accent) 8%, transparent),
+    var(--shadow);
+}
+
+@media (max-width: 720px) {
+  .topbar {
+    padding: 8px 12px;
+  }
+
+  .terminal-view {
+    padding: 10px 12px 12px;
+  }
+
+  .terminal-scroll {
+    padding: 10px 12px;
+  }
+}

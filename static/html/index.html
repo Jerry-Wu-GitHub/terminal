@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <title>Web Terminal</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23060806'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%2339ff14'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./static/css/theme.css">
+  <link rel="stylesheet" href="./static/css/layout.css">
+  <link rel="stylesheet" href="./static/css/components.css">
+  <link rel="stylesheet" href="./static/css/terminal.css">
+</head>
+<body>
+
+<header class="topbar">
+  <span id="connection-dot" class="status-dot" title="未连接" aria-label="连接状态"></span>
+  <span id="expiry-label" class="expiry-label" title="Terminal 过期时间">&mdash;</span>
+  <label class="terminal-id-label" for="terminal-id-input">Terminal ID:</label>
+  <input
+    id="terminal-id-input"
+    class="terminal-id-input"
+    type="text"
+    maxlength="36"
+    placeholder="留空以新建，或输入 Terminal ID"
+    autocomplete="off"
+    autocapitalize="off"
+    autocorrect="off"
+    spellcheck="false"
+    aria-label="Terminal ID"
+  >
+  <button id="primary-button" class="button primary-button" type="button">新建</button>
+  <button id="disconnect-button" class="button danger-button is-hidden" type="button" disabled>断开</button>
+  <button id="close-button" class="button danger-button is-hidden" type="button" disabled>关闭</button>
+</header>
+
+<main class="terminal-view">
+  <div id="terminal-scroll" class="terminal-scroll">
+    <div
+      id="terminal-paper"
+      class="terminal-paper"
+      contenteditable="true"
+      spellcheck="false"
+      autocapitalize="off"
+      autocomplete="off"
+      autocorrect="off"
+      aria-label="终端"
+      aria-multiline="true"
+      role="textbox"
+    >
+      <div id="scrollback-rows" class="terminal-rows"></div>
+      <div id="screen-rows" class="terminal-rows"></div>
+      <div id="terminal-cursor" class="terminal-cursor terminal-cursor--hidden" aria-hidden="true"></div>
+    </div>
+  </div>
+</main>
+
+<div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+<script type="module" src="./static/js/main.js"></script>
+
+</body>
+</html>
