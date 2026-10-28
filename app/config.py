@@ -12,4 +12,4 @@ INDEX_PATH = HTML_DIR / "index.html"
 
 # 服务监听配置
 HOST = "0.0.0.0"
-PORT = 7862
+PORT = 7860
