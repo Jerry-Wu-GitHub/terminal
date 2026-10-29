@@ -111,6 +111,8 @@ export class TerminalController {
     if (this.busy !== null) {
       return;
     }
+    // 在切换到“连接中”布局前测量，保证与连接后的终端可见区域一致。
+    const dimensions = this.renderer.measureViewportDimensions();
     this.connection.close();
     this.stopPolling();
     this.terminalId = null;
@@ -122,7 +124,7 @@ export class TerminalController {
     this.updateTopbar();
 
     try {
-      const info = await createTerminal();
+      const info = await createTerminal(dimensions);
       this.pendingInfo = info;
       this.topbar.setInputValue(info.id);
       this.prepareScreen(info);

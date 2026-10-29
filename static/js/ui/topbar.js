@@ -120,8 +120,8 @@ export class Topbar {
       ? formatExpiry(this.state.expiry)
       : "\u2014";
 
-    this.disconnectButton.classList.toggle("is-hidden", !connected);
-    this.closeButton.classList.toggle("is-hidden", !connected);
+    this.disconnectButton.classList.toggle("is-invisible", !connected);
+    this.closeButton.classList.toggle("is-invisible", !connected);
     this.disconnectButton.disabled = !connected || busy !== null;
     this.closeButton.disabled = !connected || busy !== null;
 

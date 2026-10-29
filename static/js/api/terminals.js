@@ -27,12 +27,18 @@ function buildTerminalUrl(terminalId) {
 /**
  * 创建一个新的 Terminal。
  *
- * 按照任务要求不携带任何创建参数。
+ * 按照任务要求不携带其他创建参数，只根据当前终端窗口大小指定
+ * PTY 的初始尺寸（后端格式为 `[rows, columns]`）。
  *
+ * @param {{columns: number, rows: number}} dimensions 终端窗口的字符尺寸。
  * @returns {Promise<{id: string, width: number, height: number, expiredAt: number}>} 新 Terminal 的信息。
  */
-export function createTerminal() {
-  return requestJson("POST", buildCollectionUrl(), {});
+export function createTerminal(dimensions) {
+  const body = {};
+  if (dimensions && dimensions.columns > 0 && dimensions.rows > 0) {
+    body.dimensions = [dimensions.rows, dimensions.columns];
+  }
+  return requestJson("POST", buildCollectionUrl(), body);
 }
 
 /**

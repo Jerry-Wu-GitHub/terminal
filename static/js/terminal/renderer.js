@@ -6,6 +6,10 @@
  * 虚拟光标是独立的绝对定位元素。
  */
 
+import {
+  DEFAULT_TERMINAL_COLUMNS,
+  DEFAULT_TERMINAL_ROWS,
+} from "../config.js";
 import { BLANK_CELL } from "./screen.js";
 import { DEFAULT_STYLE, resolveStyle } from "./style.js";
 
@@ -85,6 +89,69 @@ export class TerminalRenderer {
   resetView() {
     this.followOutput = true;
     this.renderedScrollbackGeneration = -1;
+  }
+
+  /**
+   * 计算当前终端窗口能容纳的字符网格尺寸。
+   *
+   * 使用终端实际字体测量单个字符宽度，再结合滚动容器的内容盒大小
+   * 计算列数与行数。结果用于新建 Terminal 时指定 PTY 尺寸。
+   *
+   * @returns {{columns: number, rows: number}} 列数与行数。
+   */
+  measureViewportDimensions() {
+    const probe = document.createElement("span");
+    probe.style.position = "absolute";
+    probe.style.visibility = "hidden";
+    probe.style.pointerEvents = "none";
+    probe.style.whiteSpace = "pre";
+    probe.style.width = "20ch";
+    probe.style.height = "1px";
+    this.paper.appendChild(probe);
+    const cellWidth = probe.getBoundingClientRect().width / 20;
+    probe.remove();
+
+    let rowHeight = 0;
+    if (this.screenRowElements.length > 0) {
+      rowHeight = this.screenRowElements[0].getBoundingClientRect().height;
+    }
+    if (!Number.isFinite(rowHeight) || rowHeight <= 0) {
+      rowHeight = Number.parseFloat(getComputedStyle(this.paper).lineHeight);
+    }
+
+    const scrollStyle = getComputedStyle(this.scrollContainer);
+    const horizontalChrome =
+      (Number.parseFloat(scrollStyle.paddingLeft) || 0) +
+      (Number.parseFloat(scrollStyle.paddingRight) || 0) +
+      (Number.parseFloat(scrollStyle.borderLeftWidth) || 0) +
+      (Number.parseFloat(scrollStyle.borderRightWidth) || 0);
+    const verticalChrome =
+      (Number.parseFloat(scrollStyle.paddingTop) || 0) +
+      (Number.parseFloat(scrollStyle.paddingBottom) || 0) +
+      (Number.parseFloat(scrollStyle.borderTopWidth) || 0) +
+      (Number.parseFloat(scrollStyle.borderBottomWidth) || 0);
+    const containerRect = this.scrollContainer.getBoundingClientRect();
+    const availableWidth = containerRect.width - horizontalChrome;
+    const availableHeight = containerRect.height - verticalChrome;
+
+    if (
+      !Number.isFinite(cellWidth) ||
+      cellWidth <= 0 ||
+      !Number.isFinite(rowHeight) ||
+      rowHeight <= 0 ||
+      availableWidth <= 0 ||
+      availableHeight <= 0
+    ) {
+      return {
+        columns: DEFAULT_TERMINAL_COLUMNS,
+        rows: DEFAULT_TERMINAL_ROWS,
+      };
+    }
+
+    return {
+      columns: Math.max(1, Math.floor(availableWidth / cellWidth)),
+      rows: Math.max(1, Math.floor(availableHeight / rowHeight)),
+    };
   }
 
   /**

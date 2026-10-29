@@ -43,7 +43,9 @@
 
 /* 过期时间与 Terminal ID 标签：贴近背景色 */
 .expiry-label {
-  min-width: 17ch;
+  width: calc(19ch + 0.5em);
+  min-width: calc(19ch + 0.5em);
+  overflow: hidden;
   color: color-mix(in srgb, var(--fg) 24%, var(--bg));
   font-size: 12px;
   letter-spacing: 0.02em;
