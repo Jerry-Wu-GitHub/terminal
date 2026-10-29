@@ -397,7 +397,6 @@ export class TerminalController {
 
   /** 强制重绘整个屏幕，用于清理输入法等外部修改的 DOM。 */
   refreshView() {
-    this.screen.markAllDirty();
-    this.renderer.sync(this.screen);
+    this.renderer.rebuild(this.screen);
   }
 }

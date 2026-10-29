@@ -88,6 +88,20 @@ export class TerminalRenderer {
   }
 
   /**
+   * 强制重建整个终端 DOM。
+   *
+   * 用于清理输入法等外部操作对 contenteditable 造成的临时修改，
+   * 包括可能被写进滚动历史区域的文本。
+   *
+   * @param {Object} screen 屏幕对象。
+   */
+  rebuild(screen) {
+    this.renderedScrollbackGeneration = -1;
+    this.screenRowElements = [];
+    this.sync(screen);
+  }
+
+  /**
    * 把屏幕内容同步到 DOM。
    *
    * @param {Object} screen 屏幕对象。

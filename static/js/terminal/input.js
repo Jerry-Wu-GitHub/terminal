@@ -1,8 +1,11 @@
 /**
  * 键盘事件到终端字节序列的映射。
  *
- * 只做纯计算，不直接发送数据；调用方根据返回的动作决定发送、复制或
- * 放行浏览器的粘贴事件。
+ * 只处理控制键、功能键和带修饰键的组合；普通可打印字符交给浏览器的
+ * beforeinput 事件处理，以便输入法（IME）能够正常启动和提交文本。
+ *
+ * 本模块只做纯计算，不直接发送数据；调用方根据返回的动作决定发送、
+ * 复制或放行浏览器的粘贴事件。
  */
 
 /**
@@ -154,9 +157,6 @@ export function resolveKeyAction(event, screen, hasSelection) {
   }
   if (FUNCTION_KEYS[key]) {
     return dataAction(FUNCTION_KEYS[key]);
-  }
-  if (key.length === 1 && !event.ctrlKey && !event.metaKey) {
-    return dataAction(key);
   }
   return null;
 }
