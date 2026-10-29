@@ -62,6 +62,22 @@ export function deleteTerminal(terminalId) {
 }
 
 /**
+ * 通过 POST 删除一个 Terminal。
+ *
+ * 用于 DELETE 接口调用失败时的兜底，后端行为与 DELETE 相同。
+ *
+ * @param {string} terminalId Terminal ID。
+ * @returns {Promise<null>} 删除完成时返回 null。
+ */
+export function deleteTerminalByPost(terminalId) {
+  const url = new URL(
+    `${encodeURIComponent(terminalId)}/delete`,
+    buildCollectionUrl()
+  );
+  return requestJson("POST", url);
+}
+
+/**
  * 构造与 Terminal 通信的 WebSocket 地址。
  *
  * 根据页面协议自动选择 ws:// 或 wss://。

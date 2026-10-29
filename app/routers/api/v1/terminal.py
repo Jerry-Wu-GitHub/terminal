@@ -54,6 +54,7 @@ async def create_terminal(
 
 
 @router.delete("/{terminal_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.post("/{terminal_id}/delete", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_terminal(
     terminal_id: str,
 ) -> None:

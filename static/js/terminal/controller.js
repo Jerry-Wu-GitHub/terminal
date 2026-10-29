@@ -9,6 +9,7 @@ import { ApiError } from "../api/client.js";
 import {
   createTerminal,
   deleteTerminal,
+  deleteTerminalByPost,
   getTerminal,
 } from "../api/terminals.js";
 import { POLL_INTERVAL_MILLISECONDS } from "../config.js";
@@ -263,9 +264,17 @@ export class TerminalController {
     let failure = null;
     try {
       await deleteTerminal(terminalId);
-    } catch (error) {
-      if (!(error instanceof ApiError && error.status === 404)) {
-        failure = error;
+    } catch (deleteError) {
+      // DELETE 调用失败时，改用 POST /{terminal_id}/delete 兜底。
+      try {
+        await deleteTerminalByPost(terminalId);
+      } catch (fallbackError) {
+        const terminalAlreadyGone =
+          (deleteError instanceof ApiError && deleteError.status === 404) ||
+          (fallbackError instanceof ApiError && fallbackError.status === 404);
+        if (!terminalAlreadyGone) {
+          failure = fallbackError;
+        }
       }
     }
 
