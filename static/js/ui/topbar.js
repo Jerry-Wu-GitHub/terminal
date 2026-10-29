@@ -12,7 +12,12 @@ import { formatExpiry } from "./format.js";
  */
 export class Topbar {
   /**
-   * @param {{onCreate: Function, onConnect: Function, onDisconnect: Function, onClose: Function}} callbacks 操作回调。
+   * @param {Object} callbacks 操作回调。
+   * @param {Function} callbacks.onCreate 点击“新建”时调用。
+   * @param {Function} callbacks.onConnect 点击“连接”时调用。
+   * @param {Function} callbacks.onDisconnect 点击“断开”时调用。
+   * @param {Function} callbacks.onClose 点击“关闭”时调用。
+   * @param {Function} [callbacks.onInputChange] 输入框内容变化时调用。
    */
   constructor(callbacks) {
     this.callbacks = callbacks;
@@ -29,7 +34,12 @@ export class Topbar {
       busy: null,
     };
 
-    this.input.addEventListener("input", () => this.render());
+    this.input.addEventListener("input", () => {
+      this.render();
+      if (typeof this.callbacks.onInputChange === "function") {
+        this.callbacks.onInputChange(this.input.value);
+      }
+    });
     this.input.addEventListener("keydown", (event) =>
       this.handleInputKeyDown(event)
     );

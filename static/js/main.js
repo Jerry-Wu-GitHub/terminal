@@ -63,6 +63,11 @@ function bootstrap() {
 
   document.addEventListener("pointerdown", unlockAudio, { once: true });
   document.addEventListener("keydown", unlockAudio, { once: true });
+
+  window.addEventListener("pagehide", () => controller.handlePageHide());
+  window.addEventListener("pageshow", () => controller.handlePageShow());
+
+  controller.restoreSession();
 }
 
 window.addEventListener("DOMContentLoaded", () => {

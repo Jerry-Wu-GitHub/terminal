@@ -15,6 +15,7 @@ import { POLL_INTERVAL_MILLISECONDS } from "../config.js";
 import { playBell } from "./bell.js";
 import { TerminalConnection } from "./connection.js";
 import { AnsiParser } from "./parser.js";
+import { loadStoredSession, saveStoredSession } from "./session-storage.js";
 import { Topbar } from "../ui/topbar.js";
 
 /**
@@ -67,6 +68,7 @@ export class TerminalController {
       onConnect: (terminalId) => this.connectToTerminal(terminalId),
       onDisconnect: () => this.disconnect(),
       onClose: () => this.destroyTerminal(),
+      onInputChange: () => this.persistSession(),
     });
 
     this.terminalId = null;
@@ -75,6 +77,7 @@ export class TerminalController {
     this.pendingInfo = null;
     this.pollTimer = null;
     this.pollInFlight = false;
+    this.pageUnloading = false;
     this.updateTopbar();
   }
 
@@ -90,6 +93,45 @@ export class TerminalController {
       expiry: this.expiry,
       busy: this.busy,
     });
+  }
+
+  /** 把当前输入框内容与连接状态写入本地存储。 */
+  persistSession() {
+    saveStoredSession({
+      terminalId: this.topbar.getInputValue(),
+      connected: this.terminalId !== null,
+    });
+  }
+
+  /**
+   * 从本地存储恢复 Terminal ID。
+   *
+   * 如果上次退出时处于连接状态且保存了 ID，则自动尝试重新连接。
+   */
+  restoreSession() {
+    const session = loadStoredSession();
+    if (session.terminalId !== "") {
+      this.topbar.setInputValue(session.terminalId);
+    }
+    if (session.connected && session.terminalId.trim() !== "") {
+      this.connectToTerminal(session.terminalId);
+    }
+  }
+
+  /**
+   * 页面即将卸载时保存当前状态。
+   *
+   * 关闭或刷新页面时浏览器会断开 WebSocket，但这不是用户主动断开，
+   * 因此需要在卸载前记录“已连接”，供下次打开时自动重连。
+   */
+  handlePageHide() {
+    this.pageUnloading = true;
+    this.persistSession();
+  }
+
+  /** 页面从往返缓存恢复时，恢复后续状态写入。 */
+  handlePageShow() {
+    this.pageUnloading = false;
   }
 
   /**
@@ -122,11 +164,13 @@ export class TerminalController {
     this.screen.cursorVisible = false;
     this.renderer.sync(this.screen);
     this.updateTopbar();
+    this.persistSession();
 
     try {
       const info = await createTerminal(dimensions);
       this.pendingInfo = info;
       this.topbar.setInputValue(info.id);
+      this.persistSession();
       this.prepareScreen(info);
       this.busy = "connecting";
       this.updateTopbar();
@@ -135,6 +179,7 @@ export class TerminalController {
       this.busy = null;
       this.pendingInfo = null;
       this.updateTopbar();
+      this.persistSession();
       this.showError(error);
       this.topbar.focusInput();
     }
@@ -164,6 +209,7 @@ export class TerminalController {
     this.screen.cursorVisible = false;
     this.renderer.sync(this.screen);
     this.updateTopbar();
+    this.persistSession();
 
     try {
       const info = await getTerminal(targetId);
@@ -174,6 +220,7 @@ export class TerminalController {
       this.busy = null;
       this.pendingInfo = null;
       this.updateTopbar();
+      this.persistSession();
       this.showError(error);
       this.topbar.focusInput();
     }
@@ -197,6 +244,7 @@ export class TerminalController {
       this.topbar.setInputValue("");
     }
     this.renderer.sync(this.screen);
+    this.persistSession();
     this.showInfo("已断开与 Terminal 的连接");
     this.topbar.focusInput();
   }
@@ -231,6 +279,7 @@ export class TerminalController {
       this.topbar.setInputValue("");
     }
     this.renderer.sync(this.screen);
+    this.persistSession();
 
     if (failure) {
       this.showError(failure);
@@ -254,6 +303,7 @@ export class TerminalController {
     this.renderer.resetView();
     this.renderer.sync(this.screen);
     this.updateTopbar();
+    this.persistSession();
     this.startPolling();
     this.focusTerminal();
   }
@@ -264,6 +314,9 @@ export class TerminalController {
    * @param {{code: number, reason: string, wasClean: boolean, intentional: boolean}} event 关闭事件。
    */
   handleConnectionClose(event) {
+    if (this.pageUnloading) {
+      return;
+    }
     this.stopPolling();
     this.terminalId = null;
     this.expiry = null;
@@ -272,6 +325,7 @@ export class TerminalController {
     this.screen.cursorVisible = false;
     this.renderer.sync(this.screen);
     this.updateTopbar();
+    this.persistSession();
     this.topbar.focusInput();
 
     if (event.intentional) {
@@ -355,6 +409,7 @@ export class TerminalController {
           this.topbar.setInputValue("");
         }
         this.renderer.sync(this.screen);
+        this.persistSession();
         this.showError("Terminal 已不存在或已过期");
         this.topbar.focusInput();
       }
