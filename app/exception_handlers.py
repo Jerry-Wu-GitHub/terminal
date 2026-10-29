@@ -7,7 +7,7 @@ from fastapi.responses import JSONResponse, Response
 from starlette import status
 
 from .exceptions import BusinessException
-from .routes.api.schemas import ErrorResponse
+from .routers.api.schemas import ErrorResponse
 
 
 async def business_exception_handler(

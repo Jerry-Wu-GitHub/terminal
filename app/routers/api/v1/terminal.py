@@ -5,12 +5,11 @@ from starlette import status
 
 from ....common import get_terminal_ws_connector
 from ..schemas import ApiResponse
-from ._common import API_VERSION
 from .request_schemas import TerminalCreate
 from .response_schemas import TerminalInfo
 
 
-router = APIRouter(prefix="/terminals")
+router = APIRouter(prefix="/terminals", tags=["Terminal API"])
 terminal_ws_connector = get_terminal_ws_connector()
 
 

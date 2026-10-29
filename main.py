@@ -5,9 +5,7 @@
 from fastapi import FastAPI
 import uvicorn
 
-from app.config import HOST, PORT
-from app.exception_handlers import EXCEPTION_HANDLER_MAPPING
-from app.routes import get_router
+from app import get_config, get_router, EXCEPTION_HANDLER_MAPPING
 
 
 # 创建 FastAPI 应用
@@ -22,4 +20,5 @@ for exp, handler in EXCEPTION_HANDLER_MAPPING.items():
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host=HOST, port=PORT)
+    config = get_config()
+    uvicorn.run(app, host=config.host, port=config.port)
