@@ -27,7 +27,7 @@ function buildTerminalUrl(terminalId) {
 /**
  * 创建一个新的 Terminal。
  *
- * 按照任务要求不携带其他创建参数，只根据当前终端窗口大小指定
+ * 不携带其他创建参数，只根据当前终端窗口大小指定
  * PTY 的初始尺寸（后端格式为 `[rows, columns]`）。
  *
  * @param {{columns: number, rows: number}} dimensions 终端窗口的字符尺寸。

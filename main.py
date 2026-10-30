@@ -5,11 +5,11 @@
 from fastapi import FastAPI
 import uvicorn
 
-from app import get_config, get_router, EXCEPTION_HANDLER_MAPPING
+from app import get_config, get_router, lifespan, EXCEPTION_HANDLER_MAPPING
 
 
 # 创建 FastAPI 应用
-app = FastAPI(title="Terminal")
+app = FastAPI(title="Terminal", lifespan=lifespan)
 
 # 添加路由
 app.include_router(get_router())
