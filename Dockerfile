@@ -6,7 +6,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 # 安装系统工具：放在 COPY 之前，改代码不会触发这一层重建
 RUN apt-get update && apt-get install -y --no-install-recommends \
       # 基础运维 / 排查
-      iproute2 lsof net-tools psmisc procps \
+      iproute2 lsof net-tools psmisc procps iputils-ping \
       curl wget ca-certificates dnsutils netcat-openbsd tcpdump \
       # 系统监控
       htop sysstat iotop ncdu tmux less \
