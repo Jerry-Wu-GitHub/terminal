@@ -67,14 +67,39 @@ export class TerminalRenderer {
     this.renderedScrollbackAdded = 0;
     this.renderedScrollbackTrimmed = 0;
     this.screenRowElements = [];
+    this.focused = false;
+    this.cursorVisible = false;
   }
 
-  /** 绑定滚动事件。 */
+  /** 绑定滚动与焦点事件。 */
   initialize() {
     this.scrollContainer.addEventListener("scroll", () => {
       this.updateFollowState();
     });
+    this.paper.addEventListener("focus", () => this.setFocused(true));
+    this.paper.addEventListener("blur", () => this.setFocused(false));
+    this.setFocused(document.activeElement === this.paper);
     this.updateFollowState();
+  }
+
+  /**
+   * 更新终端是否持有键盘焦点。
+   *
+   * 失焦时仅隐藏光标视觉，光标位置仍会随屏幕同步更新。
+   *
+   * @param {boolean} focused 是否获得焦点。
+   */
+  setFocused(focused) {
+    this.focused = focused;
+    this.updateCursorVisibility();
+  }
+
+  /** 根据焦点与光标可见性刷新光标显隐。 */
+  updateCursorVisibility() {
+    this.cursorElement.classList.toggle(
+      "terminal-cursor--hidden",
+      !this.cursorVisible || !this.focused
+    );
   }
 
   /** 根据滚动位置更新“跟随输出”状态。 */
@@ -361,6 +386,9 @@ export class TerminalRenderer {
   /**
    * 更新虚拟光标位置与显隐。
    *
+   * 位置始终跟随屏幕更新，即使终端失焦，后端发来的光标移动指令也会被
+   * 记录；显隐则同时要求屏幕光标可见且终端持有焦点。
+   *
    * @param {Object} screen 屏幕对象。
    */
   syncCursor(screen) {
@@ -371,10 +399,8 @@ export class TerminalRenderer {
       "--cursor-column",
       String(screen.cursor.column)
     );
-    this.cursorElement.classList.toggle(
-      "terminal-cursor--hidden",
-      !screen.cursorVisible
-    );
+    this.cursorVisible = screen.cursorVisible;
+    this.updateCursorVisibility();
   }
 
   /** 滚动到底部。 */
