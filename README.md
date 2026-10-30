@@ -28,6 +28,10 @@ license: Apache License 2.0
 - 后端将收到的输入写入 PTY，由 PTY 中运行的 shell 或前台进程处理。
 - 后端实时读取 PTY 输出，并通过 WebSocket 广播给所有订阅该终端的前端。
 
+> [!CAUTION]
+>
+> 由于后端需要调用 `pexpect.spawn`，因此，不支持部署在 Windows 设备上。
+
 ## 快速开始
 
 1. 克隆仓库
