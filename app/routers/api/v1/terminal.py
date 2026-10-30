@@ -3,13 +3,14 @@ from typing import List
 from fastapi import APIRouter, WebSocket
 from starlette import status
 
-from ....common import get_terminal_ws_connector
+from ....common import get_config, get_terminal_ws_connector
 from ..schemas import ApiResponse
 from .request_schemas import TerminalCreate
 from .response_schemas import TerminalInfo
 
 
 router = APIRouter(prefix="/terminals", tags=["Terminal API"])
+config = get_config()
 terminal_ws_connector = get_terminal_ws_connector()
 
 
@@ -40,11 +41,15 @@ async def create_terminal(
     """
     创建一个新的 Terminal。
     """
+    cwd = terminal_create_params.cwd
+    if cwd is None:
+        cwd = config.terminal_init_cwd
+
     terminal_id = await terminal_ws_connector.create_terminal(
         terminal_id=terminal_create_params.terminal_id,
         command=terminal_create_params.command,
         args=terminal_create_params.args,
-        cwd=terminal_create_params.cwd,
+        cwd=cwd,
         env=terminal_create_params.env,
         dimensions=terminal_create_params.dimensions,
         idle_timeout=terminal_create_params.idle_timeout,

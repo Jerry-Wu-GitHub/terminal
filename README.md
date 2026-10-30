@@ -94,12 +94,13 @@ license: Apache License 2.0
 
 应用启动时会调用 `load_dotenv()`，因此也可以通过项目根目录下的 `.env` 文件配置。环境变量未设置或为空字符串时使用默认值；`PORT` 等需要类型转换的变量若转换失败，也会回退到默认值。
 
-| 环境变量     | 说明                        | 默认值                            |
-| ------------ | --------------------------- | --------------------------------- |
-| `BASE_DIR`   | Terminal 根目录             | 本仓库根目录                      |
-| `STATIC_DIR` | Terminal 静态资源目录       | `"${BASE_DIR}/static"`            |
-| `INDEX_PATH` | Terminal 首页 HTML 文件路径 | `"${STATIC_DIR}/html/index.html"` |
-| `HOST`       | 服务监听主机                | `"0.0.0.0"`                       |
-| `PORT`       | 服务监听端口                | `7860`                            |
+| 环境变量            | 说明                        | 默认值                            |
+| ------------------- | --------------------------- | --------------------------------- |
+| `BASE_DIR`          | Terminal 根目录             | 本仓库根目录                      |
+| `STATIC_DIR`        | Terminal 静态资源目录       | `"${BASE_DIR}/static"`            |
+| `INDEX_PATH`        | Terminal 首页 HTML 文件路径 | `"${STATIC_DIR}/html/index.html"` |
+| `HOST`              | 服务监听主机                | `"0.0.0.0"`                       |
+| `PORT`              | 服务监听端口                | `7860`                            |
+| `TERMINAL_INIT_CWD` | Terminal 初始工作目录       | 父进程工作目录                    |
 
 - `HOST` 和 `PORT` 仅在启动本仓库根目录里的 `main.py` 时才有效。

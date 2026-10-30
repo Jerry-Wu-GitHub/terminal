@@ -15,6 +15,7 @@ from .constants import (
     DEFAULT_INDEX_PATH,
     DEFAULT_HOST,
     DEFAULT_PORT,
+    DEFAULT_TERMINAL_INIT_CWD,
 )
 
 
@@ -68,6 +69,8 @@ _INDEX_PATH: Path = getenv("INDEX_PATH", DEFAULT_INDEX_PATH, Path)
 _HOST: str = getenv("HOST", DEFAULT_HOST)
 _PORT: int = getenv("PORT", DEFAULT_PORT, int)
 
+_TERMINAL_INIT_CWD: Optional[str] = getenv("TERMINAL_INIT_CWD", DEFAULT_TERMINAL_INIT_CWD)
+
 
 @dataclass(frozen=True)
 class Config:
@@ -101,4 +104,9 @@ class Config:
     port: int = field(
         default=_PORT,
         metadata={"description": "运行时端口"}
+    )
+
+    terminal_init_cwd: Optional[str] = field(
+        default=_TERMINAL_INIT_CWD,
+        metadata={"description": "终端初始时的工作目录"}
     )
