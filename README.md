@@ -104,3 +104,13 @@ license: Apache License 2.0
 | `TERMINAL_INIT_CWD` | Terminal 初始工作目录       | 父进程工作目录                    |
 
 - `HOST` 和 `PORT` 仅在启动本仓库根目录里的 `main.py` 时才有效。
+
+如果由于环境变量冲突而无法配置环境变量的话，也可以使用 `Config` 对象来配置：
+
+```python
+from terminal import get_config as get_terminal_config
+
+terminal_config = get_terminal_config()
+terminal_config.terminal_init_cwd = "../"
+```
+
