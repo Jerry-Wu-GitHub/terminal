@@ -19,4 +19,4 @@ DEFAULT_HOST: str = "0.0.0.0"
 DEFAULT_PORT: int = 7860
 
 # 终端配置
-DEFAULT_TERMINAL_INIT_CWD: Optional[str] = None
+DEFAULT_TERMINAL_INIT_CWD: Optional[Path] = None

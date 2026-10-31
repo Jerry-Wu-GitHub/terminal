@@ -59,6 +59,15 @@ def getenv(
     return value
 
 
+def str2path(s: str) -> Path:
+    """将字符串解析为绝对路径。
+
+    Returns:
+        展开 ``~`` 并解析后的绝对路径对象。
+    """
+    return Path(s).expanduser().resolve()
+
+
 
 # ==== 读取环境变量 ====
 
@@ -69,7 +78,11 @@ _INDEX_PATH: Path = getenv("INDEX_PATH", DEFAULT_INDEX_PATH, Path)
 _HOST: str = getenv("HOST", DEFAULT_HOST)
 _PORT: int = getenv("PORT", DEFAULT_PORT, int)
 
-_TERMINAL_INIT_CWD: Optional[str] = getenv("TERMINAL_INIT_CWD", DEFAULT_TERMINAL_INIT_CWD)
+_TERMINAL_INIT_CWD: Optional[Path] = getenv(
+    "TERMINAL_INIT_CWD",
+    DEFAULT_TERMINAL_INIT_CWD,
+    str2path
+)
 
 
 @dataclass
@@ -107,7 +120,7 @@ class Config:
         metadata={"description": "运行时端口"}
     )
 
-    terminal_init_cwd: Optional[str] = field(
+    terminal_init_cwd: Optional[Path] = field(
         default=_TERMINAL_INIT_CWD,
         metadata={"description": "终端初始时的工作目录"}
     )

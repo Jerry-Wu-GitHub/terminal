@@ -43,7 +43,7 @@ async def create_terminal(
     """
     cwd = terminal_create_params.cwd
     if cwd is None:
-        cwd = config.terminal_init_cwd
+        cwd = str(config.terminal_init_cwd)
 
     terminal_id = await terminal_ws_connector.create_terminal(
         terminal_id=terminal_create_params.terminal_id,
