@@ -37,7 +37,7 @@ license: Apache License 2.0
 1. 克隆仓库
 
     ```bash
-    git clone https://www.modelscope.cn/studios/JerryWuModelScope/terminal.git
+    git clone https://github.com/Jerry-Wu-GitHub/terminal.git
     ```
 
 2. 安装依赖
@@ -62,7 +62,7 @@ license: Apache License 2.0
 1. 在入口文件的包搜索路径里，将本仓库作为项目子模块
 
     ```bash
-    git submodule add https://www.modelscope.cn/studios/JerryWuModelScope/terminal.git terminal
+    git submodule add https://github.com/Jerry-Wu-GitHub/terminal.git terminal
     git submodule update --remote
     ```
 
@@ -117,4 +117,3 @@ from terminal import get_config as get_terminal_config
 terminal_config = get_terminal_config()
 terminal_config.terminal_init_cwd = "../"
 ```
-
