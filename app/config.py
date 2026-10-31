@@ -72,12 +72,13 @@ _PORT: int = getenv("PORT", DEFAULT_PORT, int)
 _TERMINAL_INIT_CWD: Optional[str] = getenv("TERMINAL_INIT_CWD", DEFAULT_TERMINAL_INIT_CWD)
 
 
-@dataclass(frozen=True)
+@dataclass
 class Config:
     """项目全局配置。
 
     所有字段的默认值来自环境变量，环境变量未设置时回退到
-    :mod:`app.constants` 中定义的常量。该类为不可变对象，
+    :mod:`app.constants` 中定义的常量。
+
     请通过 :func:`get_config` 获取全局唯一实例。
     """
 
