@@ -105,7 +105,7 @@ class Terminal:
         """
         self._command: str = "bash" if (command is None) else command
         self._args: Optional[List[str]] = args
-        self._cwd: Optional[str] = "." if cwd is None else str(cwd)
+        self._cwd: Optional[str] = None if cwd is None else str(cwd)
         self._env: Optional[Dict[str, Any]] = env
         self._initial_dimensions: Optional[Tuple[int, int]] = dimensions
         self._output_callback: Optional[TerminalOutputCallbackAsync] = output_callback
