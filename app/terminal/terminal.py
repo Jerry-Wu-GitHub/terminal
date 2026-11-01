@@ -105,7 +105,7 @@ class Terminal:
         """
         self._command: str = "bash" if (command is None) else command
         self._args: Optional[List[str]] = args
-        self._cwd: Optional[str] = str(cwd) if cwd is not None else None
+        self._cwd: Optional[str] = "." if cwd is None else str(cwd)
         self._env: Optional[Dict[str, Any]] = env
         self._initial_dimensions: Optional[Tuple[int, int]] = dimensions
         self._output_callback: Optional[TerminalOutputCallbackAsync] = output_callback
@@ -327,14 +327,14 @@ class Terminal:
         """
         self._init_loop()
 
-        try:
-            spawn_kwargs = {
-                "cwd": self._cwd,
-                "env": self._env,
-                "dimensions": self._initial_dimensions,
-            }
-            spawn_kwargs = {k: v for k, v in spawn_kwargs.items() if v is not None}
+        spawn_kwargs = {
+            "cwd": self._cwd,
+            "env": self._env,
+            "dimensions": self._initial_dimensions,
+        }
+        spawn_kwargs = {k: v for k, v in spawn_kwargs.items() if v is not None}
 
+        try:
             if self._args:
                 self._child = pexpect.spawn(self._command, self._args, **spawn_kwargs)
             else:
