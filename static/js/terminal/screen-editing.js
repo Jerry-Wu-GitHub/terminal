@@ -182,10 +182,22 @@ export function eraseCharacters(screen, count = 1) {
  * @param {number} count 数量。
  */
 export function insertLines(screen, count = 1) {
-  const amount = Math.max(1, Math.min(screen.rows, Math.trunc(count) || 1));
+  if (
+    screen.cursor.row < screen.scrollTop ||
+    screen.cursor.row > screen.scrollBottom
+  ) {
+    return;
+  }
+  const amount = Math.max(
+    1,
+    Math.min(
+      screen.scrollBottom - screen.cursor.row + 1,
+      Math.trunc(count) || 1
+    )
+  );
   for (let index = 0; index < amount; index += 1) {
     screen.screenRows.splice(screen.cursor.row, 0, screen.createBlankRow());
-    screen.screenRows.pop();
+    screen.screenRows.splice(screen.scrollBottom + 1, 1);
   }
   screen.markRowsFrom(screen.cursor.row);
 }
@@ -197,10 +209,22 @@ export function insertLines(screen, count = 1) {
  * @param {number} count 数量。
  */
 export function deleteLines(screen, count = 1) {
-  const amount = Math.max(1, Math.min(screen.rows, Math.trunc(count) || 1));
+  if (
+    screen.cursor.row < screen.scrollTop ||
+    screen.cursor.row > screen.scrollBottom
+  ) {
+    return;
+  }
+  const amount = Math.max(
+    1,
+    Math.min(
+      screen.scrollBottom - screen.cursor.row + 1,
+      Math.trunc(count) || 1
+    )
+  );
   for (let index = 0; index < amount; index += 1) {
     screen.screenRows.splice(screen.cursor.row, 1);
-    screen.screenRows.push(screen.createBlankRow());
+    screen.screenRows.splice(screen.scrollBottom, 0, screen.createBlankRow());
   }
   screen.markRowsFrom(screen.cursor.row);
 }
@@ -214,8 +238,8 @@ export function deleteLines(screen, count = 1) {
 export function scrollDown(screen, count = 1) {
   const amount = Math.max(1, Math.trunc(count) || 1);
   for (let index = 0; index < amount; index += 1) {
-    screen.screenRows.pop();
-    screen.screenRows.unshift(screen.createBlankRow());
+    screen.screenRows.splice(screen.scrollBottom, 1);
+    screen.screenRows.splice(screen.scrollTop, 0, screen.createBlankRow());
   }
   screen.markAllDirty();
 }
@@ -227,10 +251,10 @@ export function scrollDown(screen, count = 1) {
  */
 export function reverseIndex(screen) {
   screen.wrapPending = false;
-  if (screen.cursor.row > 0) {
-    screen.cursor.row -= 1;
-  } else {
+  if (screen.cursor.row === screen.scrollTop) {
     scrollDown(screen, 1);
+  } else if (screen.cursor.row > 0) {
+    screen.cursor.row -= 1;
   }
 }
 
@@ -249,10 +273,14 @@ export function enterAlternateScreen(screen) {
     style: screen.currentStyle,
     wrapPending: screen.wrapPending,
     savedCursor: screen.savedCursor,
+    scrollTop: screen.scrollTop,
+    scrollBottom: screen.scrollBottom,
   };
   screen.alternateActive = true;
   screen.screenRows = screen.createBlankRows();
   screen.cursor = { row: 0, column: 0 };
+  screen.scrollTop = 0;
+  screen.scrollBottom = screen.rows - 1;
   screen.wrapPending = false;
   screen.clearRevision += 1;
   screen.markAllDirty();
@@ -275,6 +303,8 @@ export function leaveAlternateScreen(screen) {
   screen.currentStyle = saved.style;
   screen.wrapPending = saved.wrapPending;
   screen.savedCursor = saved.savedCursor;
+  screen.scrollTop = saved.scrollTop;
+  screen.scrollBottom = saved.scrollBottom;
   screen.clearRevision += 1;
   screen.markAllDirty();
 }

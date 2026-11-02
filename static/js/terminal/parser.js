@@ -380,9 +380,11 @@ export class AnsiParser {
     } else if (finalCharacter === "D") {
       screen.moveCursorBy(0, -amountAt(parameters, 0));
     } else if (finalCharacter === "E") {
-      screen.moveCursorTo(screen.cursor.row + amountAt(parameters, 0), 0);
+      screen.moveCursorBy(amountAt(parameters, 0), 0);
+      screen.carriageReturn();
     } else if (finalCharacter === "F") {
-      screen.moveCursorTo(screen.cursor.row - amountAt(parameters, 0), 0);
+      screen.moveCursorBy(-amountAt(parameters, 0), 0);
+      screen.carriageReturn();
     } else if (finalCharacter === "G" || finalCharacter === "`") {
       screen.moveCursorTo(
         screen.cursor.row,
@@ -392,6 +394,11 @@ export class AnsiParser {
       screen.moveCursorTo(
         (parameterAt(parameters, 0, 1) || 1) - 1,
         screen.cursor.column
+      );
+    } else if (finalCharacter === "r" && !privatePrefix) {
+      screen.setScrollRegion(
+        parameterAt(parameters, 0, 1) || 1,
+        parameterAt(parameters, 1, screen.rows) || screen.rows
       );
     } else if (finalCharacter === "J") {
       eraseInDisplay(screen, parameterAt(parameters, 0, 0));

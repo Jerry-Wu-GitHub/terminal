@@ -74,6 +74,8 @@ export class TerminalScreen {
     this.scrollbackTrimmed = 0;
     this.screenRows = this.createBlankRows();
     this.cursor = { row: 0, column: 0 };
+    this.scrollTop = 0;
+    this.scrollBottom = this.rows - 1;
     this.savedCursor = null;
     this.savedMainScreen = null;
     this.alternateActive = false;
@@ -287,13 +289,13 @@ export class TerminalScreen {
     this.wrapPending = false;
   }
 
-  /** 光标下移一行；已在底部时向上滚动。 */
+  /** 光标下移一行；已在滚动区域底部时向上滚动。 */
   lineFeed() {
     this.wrapPending = false;
-    if (this.cursor.row < this.rows - 1) {
-      this.cursor.row += 1;
-    } else {
+    if (this.cursor.row === this.scrollBottom) {
       this.scrollUp(1);
+    } else if (this.cursor.row < this.rows - 1) {
+      this.cursor.row += 1;
     }
   }
 
@@ -347,14 +349,48 @@ export class TerminalScreen {
   /**
    * 相对移动光标。
    *
+   * 位于滚动区域内时，纵向移动会在滚动区域边界处停下；位于区域
+   * 外时则可以继续向屏幕边缘移动。
+   *
    * @param {number} rowDelta 行偏移。
    * @param {number} columnDelta 列偏移。
    */
   moveCursorBy(rowDelta, columnDelta) {
-    this.moveCursorTo(
-      this.cursor.row + rowDelta,
-      this.cursor.column + columnDelta
+    let row = this.cursor.row + rowDelta;
+    if (rowDelta < 0 && this.cursor.row >= this.scrollTop) {
+      row = Math.max(this.scrollTop, row);
+    } else if (rowDelta > 0 && this.cursor.row <= this.scrollBottom) {
+      row = Math.min(this.scrollBottom, row);
+    }
+    this.moveCursorTo(row, this.cursor.column + columnDelta);
+  }
+
+  /**
+   * 设置滚动区域（DECSTBM）。
+   *
+   * 参数为 1 起始的行号；top 不小于 bottom 的无效区域会被忽略。
+   * 设置成功后光标回到左上角，与 VT100 行为一致。
+   *
+   * @param {number} top 顶部行号（1 起始，含）。
+   * @param {number} bottom 底部行号（1 起始，含）。
+   */
+  setScrollRegion(top, bottom) {
+    const topIndex = Math.max(
+      0,
+      Math.min(this.rows - 1, Math.trunc(top) - 1)
     );
+    const bottomIndex = Math.max(
+      0,
+      Math.min(this.rows - 1, Math.trunc(bottom) - 1)
+    );
+    if (topIndex >= bottomIndex) {
+      return;
+    }
+    this.scrollTop = topIndex;
+    this.scrollBottom = bottomIndex;
+    this.cursor.row = 0;
+    this.cursor.column = 0;
+    this.wrapPending = false;
   }
 
   /** 保存光标位置与样式。 */
@@ -379,15 +415,21 @@ export class TerminalScreen {
   }
 
   /**
-   * 向上滚动指定行数；滚出屏幕顶部的行进入回看历史。
+   * 在滚动区域内向上滚动指定行数。
+   *
+   * 滚出滚动区域顶部的行在区域从屏幕第 1 行开始时进入回看历史；
+   * 滚动区域之外的行不受影响。
    *
    * @param {number} count 行数。
    */
   scrollUp(count = 1) {
     const amount = Math.max(1, Math.trunc(count) || 1);
+    const top = this.scrollTop;
+    const bottom = this.scrollBottom;
     for (let index = 0; index < amount; index += 1) {
-      const removed = this.screenRows.shift();
-      if (!this.alternateActive) {
+      const removed = this.screenRows.splice(top, 1)[0];
+      this.screenRows.splice(bottom, 0, this.createBlankRow());
+      if (top === 0 && !this.alternateActive) {
         this.scrollback.push(removed);
         this.scrollbackAdded += 1;
         while (this.scrollback.length > MAX_SCROLLBACK_LINES) {
@@ -395,7 +437,6 @@ export class TerminalScreen {
           this.scrollbackTrimmed += 1;
         }
       }
-      this.screenRows.push(this.createBlankRow());
     }
     this.markAllDirty();
   }
