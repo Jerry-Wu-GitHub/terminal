@@ -450,9 +450,10 @@ export class TerminalController {
     if (this.terminalId === null) {
       return false;
     }
+    const normalized = text.replace(/\r\n?/g, "\n");
     const payload = this.screen.bracketPaste
-      ? `\x1b[200~${text}\x1b[201~`
-      : text;
+      ? `\x1b[200~${normalized}\x1b[201~`
+      : normalized;
     return this.connection.send(this.encoder.encode(payload));
   }
 
