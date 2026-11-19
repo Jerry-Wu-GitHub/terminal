@@ -18,8 +18,8 @@
   /* 终端配色 */
   --terminal-bg: #060806;
   --terminal-fg: #dce6dd;
-  --terminal-line-height: 21px;
   --terminal-font-size: 14px;
+  --terminal-line-height: var(--terminal-font-size);
 
   /* 派生交互色 */
   --hover-bg: color-mix(in srgb, var(--fg) 7%, transparent);
