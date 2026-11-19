@@ -29,6 +29,9 @@ function createContinuationCell(style) {
   return { text: "", width: 0, style };
 }
 
+/** 支持鼠标追踪的 DEC 私有模式，按优先级从低到高排列。 */
+const MOUSE_TRACKING_MODES = [9, 1000, 1001, 1002, 1003];
+
 /**
  * 虚拟终端屏幕。
  */
@@ -84,6 +87,11 @@ export class TerminalScreen {
     this.cursorVisible = true;
     this.bracketPaste = false;
     this.applicationCursorKeys = false;
+    this.mouseTrackingModes = new Set();
+    this.mouseTrackingMode = 0;
+    this.mouseSgr = false;
+    this.mouseUtf8 = false;
+    this.mouseUrxvt = false;
     this.wrapPending = false;
     this.clearRevision += 1;
     this.markAllDirty();
@@ -156,6 +164,46 @@ export class TerminalScreen {
    */
   setStyle(style) {
     this.currentStyle = style;
+  }
+
+  /**
+   * 开启或关闭一种鼠标追踪模式。
+   *
+   * 多个模式可能同时处于开启状态，实际生效的是优先级最高的一个：
+   * 1003 > 1002 > 1001 > 1000 > 9。
+   *
+   * @param {number} mode DEC 私有模式编号。
+   * @param {boolean} enabled 是否开启。
+   */
+  setMouseTrackingMode(mode, enabled) {
+    if (!MOUSE_TRACKING_MODES.includes(mode)) {
+      return;
+    }
+    if (enabled) {
+      this.mouseTrackingModes.add(mode);
+    } else {
+      this.mouseTrackingModes.delete(mode);
+    }
+    this.mouseTrackingMode = 0;
+    for (const candidate of MOUSE_TRACKING_MODES) {
+      if (this.mouseTrackingModes.has(candidate)) {
+        this.mouseTrackingMode = candidate;
+      }
+    }
+  }
+
+  /** 当前生效的鼠标坐标编码方式。 */
+  get mouseEncoding() {
+    if (this.mouseSgr) {
+      return "sgr";
+    }
+    if (this.mouseUtf8) {
+      return "utf8";
+    }
+    if (this.mouseUrxvt) {
+      return "urxvt";
+    }
+    return "x10";
   }
 
   /**

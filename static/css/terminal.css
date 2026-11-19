@@ -18,6 +18,11 @@
   user-select: text;
 }
 
+/* 远端程序接管鼠标时不再显示文本光标 */
+.terminal-paper--mouse-tracking {
+  cursor: default;
+}
+
 .terminal-rows {
   margin: 0;
   padding: 0;

@@ -434,10 +434,20 @@ export class TerminalController {
    * @returns {boolean} 是否成功发送。
    */
   sendKey(text) {
+    return this.sendBytes(this.encoder.encode(text));
+  }
+
+  /**
+   * 发送原始字节。
+   *
+   * @param {Uint8Array} bytes 字节串。
+   * @returns {boolean} 是否成功发送。
+   */
+  sendBytes(bytes) {
     if (this.terminalId === null) {
       return false;
     }
-    return this.connection.send(this.encoder.encode(text));
+    return this.connection.send(bytes);
   }
 
   /**

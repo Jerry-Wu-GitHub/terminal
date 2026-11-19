@@ -69,6 +69,7 @@ export class TerminalRenderer {
     this.screenRowElements = [];
     this.focused = false;
     this.cursorVisible = false;
+    this.cellWidth = 0;
   }
 
   /** 绑定滚动与焦点事件。 */
@@ -180,6 +181,81 @@ export class TerminalRenderer {
   }
 
   /**
+   * 测量单个字符单元格的宽度。
+   *
+   * 结果会缓存；终端字体尺寸在页面生命周期内保持不变。
+   *
+   * @returns {number} 单元格宽度（像素）。
+   */
+  measureCellWidth() {
+    if (this.cellWidth > 0) {
+      return this.cellWidth;
+    }
+    const probe = document.createElement("span");
+    probe.style.position = "absolute";
+    probe.style.visibility = "hidden";
+    probe.style.pointerEvents = "none";
+    probe.style.whiteSpace = "pre";
+    probe.textContent = "0".repeat(32);
+    this.paper.appendChild(probe);
+    const width = probe.getBoundingClientRect().width / 32;
+    probe.remove();
+    if (Number.isFinite(width) && width > 0) {
+      this.cellWidth = width;
+    }
+    return this.cellWidth;
+  }
+
+  /**
+   * 把视口坐标换算为终端单元格坐标。
+   *
+   * @param {number} clientX 视口横坐标。
+   * @param {number} clientY 视口纵坐标。
+   * @param {Object} screen 屏幕对象。
+   * @param {boolean} [clamp] 越界时是否夹取到屏幕范围内。
+   * @returns {{row: number, column: number}|null} 单元格坐标；越界时为 null。
+   */
+  resolveCellAt(clientX, clientY, screen, clamp = false) {
+    const cellWidth = this.measureCellWidth();
+    let rowHeight = 0;
+    if (this.screenRowElements.length > 0) {
+      rowHeight = this.screenRowElements[0].getBoundingClientRect().height;
+    }
+    if (!Number.isFinite(rowHeight) || rowHeight <= 0) {
+      rowHeight = Number.parseFloat(getComputedStyle(this.paper).lineHeight);
+    }
+    if (
+      !Number.isFinite(cellWidth) ||
+      cellWidth <= 0 ||
+      !Number.isFinite(rowHeight) ||
+      rowHeight <= 0
+    ) {
+      return null;
+    }
+
+    const paperRect = this.paper.getBoundingClientRect();
+    const scrollbackRows = screen.alternateActive
+      ? 0
+      : screen.scrollback.length;
+    let column = Math.floor((clientX - paperRect.left) / cellWidth);
+    let row =
+      Math.floor((clientY - paperRect.top) / rowHeight) - scrollbackRows;
+
+    if (clamp) {
+      column = Math.max(0, Math.min(screen.columns - 1, column));
+      row = Math.max(0, Math.min(screen.rows - 1, row));
+    } else if (
+      column < 0 ||
+      column >= screen.columns ||
+      row < 0 ||
+      row >= screen.rows
+    ) {
+      return null;
+    }
+    return { row, column };
+  }
+
+  /**
    * 强制重建整个终端 DOM。
    *
    * 用于清理输入法等外部操作对 contenteditable 造成的临时修改，
@@ -204,6 +280,10 @@ export class TerminalRenderer {
       String(screen.columns)
     );
     this.paper.style.setProperty("--terminal-rows", String(screen.rows));
+    this.paper.classList.toggle(
+      "terminal-paper--mouse-tracking",
+      screen.mouseTrackingMode !== 0
+    );
     this.syncScrollback(screen);
     this.syncScreenRows(screen);
     this.syncCursor(screen);

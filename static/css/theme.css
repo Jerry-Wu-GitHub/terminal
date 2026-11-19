@@ -19,7 +19,7 @@
   --terminal-bg: #060806;
   --terminal-fg: #dce6dd;
   --terminal-font-size: 14px;
-  --terminal-line-height: var(--terminal-font-size);
+  --terminal-line-height: calc(var(--terminal-font-size) * 1.15);
 
   /* 派生交互色 */
   --hover-bg: color-mix(in srgb, var(--fg) 7%, transparent);

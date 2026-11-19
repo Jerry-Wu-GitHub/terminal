@@ -54,6 +54,7 @@ function bootstrap() {
   const inputBridge = new InputBridge({
     paper: elements.paper,
     screen,
+    renderer,
     controller,
     showInfo,
     showError,

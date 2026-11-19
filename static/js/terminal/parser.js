@@ -99,6 +99,20 @@ function applyPrivateModes(screen, parameters, enabled) {
       }
     } else if (mode === 2004) {
       screen.bracketPaste = enabled;
+    } else if (
+      mode === 9 ||
+      mode === 1000 ||
+      mode === 1001 ||
+      mode === 1002 ||
+      mode === 1003
+    ) {
+      screen.setMouseTrackingMode(mode, enabled);
+    } else if (mode === 1005) {
+      screen.mouseUtf8 = enabled;
+    } else if (mode === 1006) {
+      screen.mouseSgr = enabled;
+    } else if (mode === 1015) {
+      screen.mouseUrxvt = enabled;
     }
   }
 }
